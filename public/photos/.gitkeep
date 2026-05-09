@@ -1,0 +1,8 @@
+# Drop trip photos into per-day folders here:
+#
+#   day-01-arrival-tokyo/IMG_0001.jpg
+#   day-02-shibuya-shinjuku/...
+#   day-04-disneyland/...
+#
+# Slugs match data/itinerary.ts. The gallery + per-day pages
+# read this folder at request time, so just commit and push.
