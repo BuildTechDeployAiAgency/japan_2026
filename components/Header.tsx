@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
+import { useState, useEffect, useRef } from "react";
 
 const NAV = [
   { href: "/", label: "Home", jp: "家" },
@@ -18,6 +19,34 @@ const NAV = [
 
 export default function Header() {
   const pathname = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close menu when route changes
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+
+    if (menuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }
+  }, [menuOpen]);
+
+  const handleNavClick = () => {
+    setMenuOpen(false);
+  };
+
   return (
     <header className="border-b border-sumi/10 bg-washi/70 backdrop-blur-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-5 py-4">
@@ -60,24 +89,35 @@ export default function Header() {
             })}
           </ul>
         </nav>
-        <details className="md:hidden relative">
-          <summary className="list-none cursor-pointer rounded border border-sumi/15 px-3 py-1.5 text-sm">
+        <div ref={menuRef} className="md:hidden relative">
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
+            className="list-none cursor-pointer rounded border border-sumi/15 px-3 py-1.5 text-sm"
+          >
             Menu
-          </summary>
-          <ul className="absolute right-0 mt-2 w-44 rounded-md border border-sumi/10 bg-washi shadow-lg z-20">
-            {NAV.map((item) => (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className="block px-4 py-2 text-sm hover:bg-sumi/5"
-                >
-                  <span className="mr-2 font-serif text-xs text-sumi/50">{item.jp}</span>
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </details>
+          </button>
+          {menuOpen && (
+            <ul
+              id="mobile-menu"
+              className="absolute right-0 mt-2 w-44 rounded-md border border-sumi/10 bg-washi shadow-lg z-20"
+            >
+              {NAV.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    onClick={handleNavClick}
+                    className="block px-4 py-2 text-sm hover:bg-sumi/5"
+                  >
+                    <span className="mr-2 font-serif text-xs text-sumi/50">{item.jp}</span>
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
     </header>
   );
